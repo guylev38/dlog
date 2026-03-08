@@ -11,39 +11,43 @@
 /*** Includes ***/
 
 #include <sys/types.h>
-#include "dlog_s.h"
+#include <stdarg.h>
 
 /*** Enums ***/
 
-typedef enum logging_levels_e
+typedef enum log_level_e
 {
     DEBUG = 0,
     INFO,
     WARNING,
     ERROR,
-    FATAL,
 
-    LOGGING_LEVELS_LEN
-} logging_levels_e;
+    LOG_LEVEL_COUNT
+} log_level_t;
 
 /*** Consts ***/
 
-const __u_char *level_strings[] = {"DEBUG", "INFO", "ERROR", "FATAL"};
+extern const char *LEVEL_STRINGS[LOG_LEVEL_COUNT];
+extern const char *DEFAULT_FMT;
+
+/*** Defines ***/
+
+#define MAX_LOG_LENGTH (500)
+#define DEFAULT_FMT "[%s] [%s] (%s:%d) %s():"
 
 /*** Structs ***/
 
-typedef struct logger_s
-{
-    u_int32_t level;
-    __u_char *date_fmt;
-} logger_t;
-
 /*** Macros ***/
 
-#define log(...) DLOG_dispatch_log(__FILE__, __LINE__, __VA_ARGS__)
+#define DLOG_DEBUG(fmt, ...) DLOG_dispatch_log_entry(DEBUG, __FILE__, __LINE__, __func__, fmt, __VA_ARGS__)
+#define DLOG_INFO(fmt, ...) DLOG_dispatch_log_entry(INFO, __FILE__, __LINE__, __func__, fmt, __VA_ARGS__)
+#define DLOG_WARNING(fmt, ...) DLOG_dispatch_log_entry(WARNING, __FILE__, __LINE__, __func__, fmt, __VA_ARGS__)
+#define DLOG_ERROR(fmt, ...) DLOG_dispatch_log_entry(ERROR, __FILE__, __LINE__, __func__, fmt, __VA_ARGS__)
 
 /*** Functions ***/
 
-dlog_status_e DLOG_dispatch_log(__u_char *file, u_int32_t line, __u_char *msg, logger_t *logger);
+void DLOG_format_prefix(log_level_t level, char *file, int line, const char *func, char *prefix);
+void DLOG_dispatch_log(log_level_t level, char *file, int line, const char *func, char *fmt, va_list args);
+void DLOG_dispatch_log_entry(log_level_t level, char *file, int line, const char *func, char *fmt, ...);
 
 #endif
